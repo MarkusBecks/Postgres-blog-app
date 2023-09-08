@@ -1,16 +1,26 @@
 require('dotenv').config()
-const { Sequelize } = require('sequelize')
+const { Blog } = require('./models/Blog')
 
-const sequelize = new Sequelize(process.env.DATABASE_URL)
+const express = require('express')
+const app = express()
+app.use(express.json())
 
-const main = async () => {
+app.get('/api/blogs', async (req, res) => {
+  const blogs = await Blog.findAll()
+  res.json(blogs)
+})
+
+app.post('/api/blogs', async (req, res) => {
   try {
-    await sequelize.authenticate()
-    console.log('Connection has been established successfully.')
-    sequelize.close()
+    console.log(req.body)
+    const blog = await Blog.create(req.body)
+    res.json(blog)
   } catch (error) {
-    console.error('Unable to connect to the database:', error)
+    return res.status(400).json({ error })
   }
-}
+})
 
-main()
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})

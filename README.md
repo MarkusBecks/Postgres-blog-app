@@ -1,3 +1,1 @@
 # Postgres-blog-app
-
-commit

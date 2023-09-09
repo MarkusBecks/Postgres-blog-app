@@ -1,8 +1,9 @@
-const { Sequelize, Model, DataTypes } = require('sequelize')
+const { Model, DataTypes } = require('sequelize')
 
-const sequelize = new Sequelize(process.env.DATABASE_URL)
+const { sequelize } = require('../util/db')
 
 class Blog extends Model {}
+
 Model.init(
   {
     id: {
@@ -30,4 +31,4 @@ Model.init(
   }
 )
 
-module.exports = { Blog }
+module.exports = Blog

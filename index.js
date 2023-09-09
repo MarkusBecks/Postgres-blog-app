@@ -1,26 +1,25 @@
 require('dotenv').config()
-const { Blog } = require('./models/Blog')
 
 const express = require('express')
+require('express-async-errors')
 const app = express()
+const { PORT } = require('./util/config')
+const { connectToDatabase } = require('./util/db')
+const { unknownEndpoint } = require('./middleware/unknownEndpoint')
+const { errorHandler } = require('./middleware/errorHandler')
+
+const blogsRouter = require('./controllers/blogs')
+
 app.use(express.json())
+app.use('/api/blogs', blogsRouter)
+app.use(unknownEndpoint)
+app.use(errorHandler)
 
-app.get('/api/blogs', async (req, res) => {
-  const blogs = await Blog.findAll()
-  res.json(blogs)
-})
+const start = async () => {
+  await connectToDatabase()
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+  })
+}
 
-app.post('/api/blogs', async (req, res) => {
-  try {
-    console.log(req.body)
-    const blog = await Blog.create(req.body)
-    res.json(blog)
-  } catch (error) {
-    return res.status(400).json({ error })
-  }
-})
-
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+start()

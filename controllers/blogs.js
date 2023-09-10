@@ -1,29 +1,34 @@
 const express = require('express')
 const router = express.Router()
-const { Blog } = require('../models')
+const { Blog, User } = require('../models')
+const { tokenExtractor, userExtractor } = require('../middleware')
 
 router.get('/', async (req, res) => {
-  const blogs = await Blog.findAll()
+  const blogs = await Blog.findAll({
+    attributes: { exclude: ['userId'] },
+    include: {
+      model: User,
+      attributes: ['name'],
+    },
+  })
   res.json(blogs)
 })
 
-router.post('/', async (req, res) => {
-  if (req.body) {
-    console.log(req.body)
-    const blog = await Blog.create(req.body)
-    res.json(blog)
-  } else {
-    res.status(400).json({ error: 'Invalid request body' })
+router.post('/', tokenExtractor, userExtractor, async (req, res) => {
+  const user = req.user
+  if (!user) {
+    return res.status(401).json({ error: 'authentication failed' })
   }
+  const blog = await Blog.create({ ...req.body, userId: user.id })
+  res.status(201).json(blog)
 })
 
 const singleRouter = express.Router()
 
+// Attach the found blog to the request
 const blogFinder = async (req, res, next) => {
   const { id } = req.params
-  console.log('running blogFinder middleware')
   req.blog = await Blog.findByPk(id)
-  console.log('req.blog: ', req.blog)
 
   next()
 }
@@ -32,12 +37,21 @@ singleRouter.get('/', async (req, res) => {
   req.blog ? res.json(req.blog) : res.status(404).end()
 })
 
-singleRouter.delete('/', async (req, res) => {
-  if (req.blog) {
-    await req.blog.destroy()
-    res.status(204).end()
+singleRouter.delete('/', tokenExtractor, userExtractor, async (req, res) => {
+  const user = req.user
+  const blog = req.blog
+
+  if (!user) {
+    return res.status(401).json({ error: 'authentication failed' })
+  }
+  if (!blog) {
+    return res.status(404).json({ error: 'blog not found' })
+  }
+  if (blog.userId !== user.id) {
+    return res.status(401).json({ error: 'unauthorized' })
   } else {
-    res.status(404).json({ error: 'No blog found' })
+    await blog.destroy()
+    res.status(204).end()
   }
 })
 

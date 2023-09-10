@@ -4,4 +4,4 @@ const errorHandler = (error, req, res, next) => {
   res.status(status).send(error.message)
 }
 
-module.exports = { errorHandler }
+module.exports = errorHandler

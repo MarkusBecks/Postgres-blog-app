@@ -4,6 +4,9 @@ const { User, Blog } = require('../models')
 
 router.get('/', async (req, res) => {
   const users = await User.findAll({
+    attributes: {
+      exclude: ['passwordHash'],
+    },
     include: {
       model: Blog,
       attributes: { exclude: ['userId'] },
@@ -24,18 +27,21 @@ router.post('/', async (req, res) => {
 
 const userFinder = async (req, res, next) => {
   const { id } = req.params
-  console.log('running userFinder middleware')
-  req.user = await User.findByPk(id)
-  console.log('req.blog: ', req.user)
+  req.user = await User.findByPk(id, {
+    attributes: {
+      exclude: ['passwordHash'],
+    },
+  })
 
   next()
 }
 
-router.get('/:id', async (req, res) => {
-  if (req.user) {
-    // do stuff
+router.get('/:id', userFinder, async (req, res) => {
+  const user = req.user
+  if (!user) {
+    res.status(404).json({ error: 'user not found' })
   } else {
-    res.status(404).end()
+    res.json(user)
   }
 })
 

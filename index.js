@@ -7,13 +7,19 @@ const { PORT } = require('./util/config')
 const { connectToDatabase } = require('./util/db')
 const { unknownEndpoint, errorHandler } = require('./middleware')
 
-const { blogsRouter, usersRouter, loginRouter } = require('./controllers')
+const {
+  blogsRouter,
+  usersRouter,
+  loginRouter,
+  authorsRouter,
+} = require('./controllers')
 
 app.use(express.json())
 
 app.use('/api/login', loginRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/blogs', blogsRouter)
+app.use('/api/authors', authorsRouter)
 app.use(unknownEndpoint)
 app.use(errorHandler)
 

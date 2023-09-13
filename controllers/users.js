@@ -1,11 +1,12 @@
 const bcrypt = require('bcrypt')
 const router = require('express').Router()
-const { User, Blog } = require('../models')
+const { User, Blog, ReadingList } = require('../models')
+const { userFinder } = require('../middleware')
 
 router.get('/', async (req, res) => {
   const users = await User.findAll({
     attributes: {
-      exclude: ['passwordHash'],
+      exclude: ['passwordHash', 'createdAt', 'updatedAt'],
     },
     include: {
       model: Blog,
@@ -25,19 +26,36 @@ router.post('/', async (req, res) => {
   res.json(user)
 })
 
-const userFinder = async (req, res, next) => {
+/* router.get('/', async (req, res) => {
   const { id } = req.params
-  req.user = await User.findByPk(id, {
-    attributes: {
-      exclude: ['passwordHash'],
+  const readingList = await ReadingList.findAll({
+    include: {
+      model: Blog,
+      attributes: ['id', 'url', 'title', 'author', 'likes', 'year'],
     },
+    where: { id },
   })
 
-  next()
-}
+  res.json(readingList)
+}) */
 
-router.get('/:id', userFinder, async (req, res) => {
-  const user = req.user
+router.get('/:id', async (req, res) => {
+  const { id } = req.params
+  const user = await User.findOne({
+    where: { id },
+    attributes: {
+      exclude: ['passwordHash', 'createdAt', 'updatedAt', 'admin', 'disabled'],
+    },
+    include: [
+      {
+        model: Blog,
+        as: 'readings',
+        attributes: { exclude: ['userId'] },
+        through: { attributes: ['id', 'read'] },
+      },
+    ],
+  })
+
   if (!user) {
     res.status(404).json({ error: 'user not found' })
   } else {
@@ -45,17 +63,9 @@ router.get('/:id', userFinder, async (req, res) => {
   }
 })
 
-router.put('/:username', async (req, res) => {
-  const { username } = req.params
-  const { username: updatedUsername } = req.body
-
-  req.user = await User.findOne({
-    where: {
-      username,
-    },
-  })
+router.put('/:username', userFinder, async (req, res) => {
   if (req.user) {
-    req.user.username = updatedUsername
+    req.user.username = req.body.username
     await req.user.save()
     res.json(req.user)
   } else {

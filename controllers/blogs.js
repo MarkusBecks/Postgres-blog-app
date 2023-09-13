@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { Blog, User } = require('../models')
 const { Op } = require('sequelize')
-const { tokenExtractor, userExtractor } = require('../middleware')
+const { tokenExtractor, userExtractor, blogFinder } = require('../middleware')
 
 router.get('/', async (req, res) => {
   const { search } = req.query
@@ -47,14 +47,6 @@ router.post('/', tokenExtractor, userExtractor, async (req, res) => {
 })
 
 const singleRouter = express.Router()
-
-// Attach the found blog to the request
-const blogFinder = async (req, res, next) => {
-  const { id } = req.params
-  req.blog = await Blog.findByPk(id)
-
-  next()
-}
 
 singleRouter.get('/', async (req, res) => {
   req.blog ? res.json(req.blog) : res.status(404).end()

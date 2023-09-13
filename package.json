@@ -14,13 +14,15 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
-    "sequelize": "^6.32.1"
+    "sequelize": "^6.32.1",
+    "umzug": "^3.3.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "print": "node cli.js"
+    "print": "node cli.js",
+    "migration:down": "node util/rollback.js"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.4.9",

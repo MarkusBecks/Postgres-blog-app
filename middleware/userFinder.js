@@ -1,3 +1,5 @@
+const { User } = require('../models')
+
 /* attach user to req.user by id
   exclude passwordHash from response
 */

@@ -13,6 +13,7 @@ const {
   loginRouter,
   authorsRouter,
   readingListsRouter,
+  logoutRouter,
 } = require('./controllers')
 
 app.use(express.json())
@@ -22,6 +23,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/authors', authorsRouter)
 app.use('/api/readinglists', readingListsRouter)
+app.use('/api/logout', logoutRouter)
 app.use(unknownEndpoint)
 app.use(errorHandler)
 

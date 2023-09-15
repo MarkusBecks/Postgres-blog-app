@@ -3,6 +3,7 @@ const usersRouter = require('./users')
 const loginRouter = require('./login')
 const authorsRouter = require('./authors')
 const readingListsRouter = require('./readingLists')
+const logoutRouter = require('./logout')
 
 module.exports = {
   blogsRouter,
@@ -10,4 +11,5 @@ module.exports = {
   loginRouter,
   authorsRouter,
   readingListsRouter,
+  logoutRouter,
 }

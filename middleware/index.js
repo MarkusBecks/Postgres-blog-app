@@ -4,6 +4,7 @@ const tokenExtractor = require('./tokenExtractor')
 const userExtractor = require('./userExtractor')
 const userFinder = require('./userFinder')
 const blogFinder = require('./blogFinder')
+const accessGuard = require('./accessGuard')
 
 module.exports = {
   unknownEndpoint,
@@ -12,4 +13,5 @@ module.exports = {
   userExtractor,
   userFinder,
   blogFinder,
+  accessGuard,
 }

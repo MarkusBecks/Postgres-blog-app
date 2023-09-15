@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt')
 const router = require('express').Router()
 const { User, Blog } = require('../models')
-const { userFinder } = require('../middleware')
 
 router.get('/', async (req, res) => {
   const users = await User.findAll({
@@ -56,11 +55,16 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.put('/:username', userFinder, async (req, res) => {
-  if (req.user) {
-    req.user.username = req.body.username
-    await req.user.save()
-    return res.json(req.user)
+router.put('/:username', async (req, res) => {
+  const { username } = req.params
+  const user = await User.findOne({
+    where: { username },
+  })
+
+  if (user) {
+    user.name = req.body.name
+    await user.save()
+    return res.json(user)
   } else {
     res.status(404).end()
   }
